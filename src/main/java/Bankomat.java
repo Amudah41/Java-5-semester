@@ -1,37 +1,32 @@
 import java.util.*;
 
-import static java.lang.System.in;
-
 public class Bankomat {
-
     public static void main(String[] args){
-        Scanner input = new Scanner(in);
+        Scanner scanner = new Scanner(System.in);
         long sum;
-        String data = input.next();
+        String result = scanner.next();
         try {
-            Long.parseLong(data);
+            Long.parseLong(result);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Сумма  должна быть целым числом.");
         }
-        sum = Long.parseLong(data);
+        sum = Long.parseLong(result);
         if (sum <= 0) {
             System.out.print("Значение суммы должно быть положительным.");
             System.exit(0);
         }
 
-        String bank = input.nextLine();
-        String[] banknotesStr = bank.split(" ");
+        String bank = scanner.nextLine();
+        String[] bankStr = bank.split(" ");
 
-        int CountOfNominals=0;
         List<Integer> banknotes = new ArrayList<>();
-        for (String note : banknotesStr) {
-            if (note.equals("")){
+        for (String tmp : bankStr) {
+            if (tmp.equals("")){
                 continue;
             }
-            if (note.matches("[0-9]+")) {
-                if (Integer.parseInt(note) > 0) {
-                    banknotes.add(Integer.parseInt(note));
-                    CountOfNominals++;
+            if (tmp.matches("[0-9]+")) {
+                if (Integer.parseInt(tmp) > 0) {
+                    banknotes.add(Integer.parseInt(tmp));
 
                 } else {
                     System.out.print("Значение банкнот должно быть положительным.");
@@ -42,44 +37,59 @@ public class Bankomat {
                 System.exit(0);
             }
         }
-
-        long[] counts = new long[CountOfNominals];
-        for (int i = 0; i < CountOfNominals; i++){
+        DeleteDuplicates(banknotes);
+        long[] counts = new long[banknotes.size()];
+        for (int i = 0; i < banknotes.size()-1; i++){
             counts[i] = 0;
         }
-
         System.out.println(Exchange(banknotes, counts, 0, sum));
         System.out.print("Количество комбинаций: "+ Combinations);
     }
 
-    public static String data = "";
+    public static void DeleteDuplicates(List<Integer> banknotes){
+        Collections.sort(banknotes);
+        int tmp;
+        int size = banknotes.size();
+        for(int i = 1; i < size - 1; i++){
+             tmp = banknotes.get(i - 1);
+            while (banknotes.get(i) == tmp && i < size-1) {
+                banknotes.remove(i);
+                size--;
+            }
+        }
+        if (banknotes.get(size - 1).equals(banknotes.get(size - 2))) {
+            banknotes.remove(banknotes.get(size-1));
+        }
+    }
+
+    public static String result = "";
     public static long Combinations = 0;
 
-    public static String Exchange(List<Integer> banknotes, long[] counts, int startIndex, long totalSum) {
-        if (startIndex >= banknotes.size()) {
+    public static String Exchange(List<Integer> banknotes, long[] counts, int index, long sum) {
+        if (index >= banknotes.size()) {
             Combinations++;
             for (int i = 0; i < banknotes.size(); i++) {
                 for(int j = 0; j < counts[i]; j++){
-                    data += banknotes.get(i) +" ";
+                    result += banknotes.get(i) +" ";
                 }
             }
-            data += "\n";
-            return data;
+            result += "\n";
+            return result;
         }
-        if (startIndex == banknotes.size() - 1) {
+        if (index == banknotes.size() - 1) {
 
-            if (totalSum % banknotes.get(startIndex) == 0) {
-                counts[startIndex] = totalSum / banknotes.get(startIndex);
-                Exchange(banknotes, counts, startIndex + 1, 0);
+            if (sum % banknotes.get(index) == 0) {
+                counts[index] = sum / banknotes.get(index);
+                Exchange(banknotes, counts, index + 1, 0);
             }
         }
         else {
-            for (int i = 0; i <= totalSum / banknotes.get(startIndex); i++) {
-                counts[startIndex] = i;
-                Exchange(banknotes, counts, startIndex + 1, totalSum - banknotes.get(startIndex) * i);
+            for (int i = 0; i <= sum / banknotes.get(index); i++) {
+                counts[index] = i;
+                Exchange(banknotes, counts, index + 1, sum - banknotes.get(index) * i);
             }
         }
-        return data;
+        return result;
     }
 }
 
